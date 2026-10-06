@@ -1,0 +1,26 @@
+groups:
+    - name: flask.rules
+    rules:
+            - alert: FlaskDown
+        expr: up{job="flask-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flask API DOWN"
+
+            - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[1m]) / rate(http_requests_total[1m]) > 0.05
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreur > 5%"
+
+            - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence P95 > 1s"
